@@ -40,6 +40,8 @@
         "Reply": "Reply",
         "What’s happening": "Trends for you",
         "History": "Bookmarks",
+        "Post your reply": "Tweet your reply",
+        "See new posts": "See new Tweets",
         "Delete post?": "Delete Tweet?",
         "Your post was sent.": "Your Tweet was sent.",
     }
@@ -82,7 +84,11 @@
             return
 
         // react swaps icons inside the buttons, so look from the whole action bar
-        root = root.closest("[role=group]") ?? root
+        root = root.closest("[role=group], [data-testid=sendDMFromProfile]") ?? root
+
+        // profile "message" button was an envelope
+        for (const button of root.querySelectorAll("[data-testid=sendDMFromProfile]"))
+            setIcon(button.querySelector("svg"), "mail")
 
         for (const button of root.querySelectorAll("[role=group] button[data-testid], [role=group] a[href$=analytics], [role=group] button[aria-label]")) {
             const name = ACTIONS[button.dataset.testid]
@@ -172,6 +178,10 @@
         // "Show 12 posts"
         if (!replacement && /^Show \d+ posts?$/.test(value))
             replacement = value.replace(/posts?$/, "Tweets")
+
+        // footer
+        if (!replacement && /^© \d{4} X Corp\.$/.test(value))
+            replacement = value.replace("X Corp.", "Twitter, Inc.")
 
         if (replacement && replacement !== value)
             node.nodeValue = replacement

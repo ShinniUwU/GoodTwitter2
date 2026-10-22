@@ -1,5 +1,6 @@
 // Twitter 2020: 2019-2022 look on top of the current X layout.
 // Do not use together with the GoodTwitter2 script.
+@use "./util/functions" as *;
 @use "./util/mixins" as *;
 @use "./common/icons-2017-edge" as edge;
 
@@ -18,6 +19,17 @@ body :not(svg):not(path) {
 
 // 2017-2022 icon set
 @include edge.icons-2017-edge;
+
+// the mask trick can't draw the small dots icon, the 2017 one looked the same anyway
+#{svg-selector("2022/more-horiz")} {
+    mask-image: none;
+    stroke-width: 0;
+    transform: none;
+
+    ~ * {
+        display: inline;
+    }
+}
 
 // blue bird instead of x logo
 @include svg-override("vendor/twitter-x", "vendor/twitter-bird");
@@ -134,9 +146,43 @@ button[data-testid$=-unfollow] {
     display: none !important;
 }
 
+// anything else grok, found by its logo or a grok.com link:
+// "generate with grok" (composer), "edit image" (tweet menu), "profile summary" (profiles)
+:is(button, a, [role=button], [role=menuitem]):has(svg path[d^="M12.745 20.54l10.97-8.19"]),
+a[href^="https://grok.com"],
+svg:has(path[d^="M12.745 20.54l10.97-8.19"]) {
+    display: none !important;
+}
+
 // premium upsell and news box (sidebar), analytics upsell (own tweets)
 div:has(> div > aside a[href^="/i/premium_sign_up"]),
 div:has(> div > div > a[href="/i/account_analytics"]),
-div:has(> [data-testid=news_sidebar]) {
+div:has(> [data-testid=news_sidebar]),
+div:empty:has(+ div > [data-testid=news_sidebar]),
+div:has(> div > aside a[href^="/i/premium_sign_up"]) + div:empty {
+    display: none !important;
+}
+
+// view counts (added dec 2022): action bar and tweet page
+[role=group] > div:has(> a[href$="/analytics"]),
+div[aria-hidden=true]:has(+ a[href$="/analytics"]),
+a[href$="/analytics"] {
+    display: none !important;
+}
+
+// content disclosure (composer)
+div:has(> [data-testid=contentDisclosureButton]),
+[data-testid=contentDisclosureButton] {
+    display: none !important;
+}
+
+// "today's news" stories (explore): the header cell and the story cells
+[data-testid=cellInnerDiv]:has(+ [data-testid=cellInnerDiv] [data-testid=trend] [data-testid^=UserAvatar-Container]),
+[data-testid=cellInnerDiv]:has([data-testid=trend] [data-testid^=UserAvatar-Container]) {
+    display: none !important;
+}
+
+// premium-only "priority" notifications tab
+:has(> a[role=tab][href="/notifications/priority"]) {
     display: none !important;
 }
